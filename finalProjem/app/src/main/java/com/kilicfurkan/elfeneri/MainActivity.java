@@ -1,4 +1,4 @@
-package com.example.elfeneri;
+package com.kilicfurkan.elfeneri;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -9,6 +9,7 @@ import android.hardware.SensorManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
 import android.os.Bundle;
+import android.view.View;
 import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -33,23 +34,31 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private boolean fenerAcik = false;
     private CameraManager kameraYonetici;
     private String kameraID;
+
+    private ConstraintLayout anaEkran;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        Button sos = (Button) findViewById(R.id.sosButton);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+
         });
+
+        anaEkran = findViewById(R.id.main);
 
         pusula = findViewById(R.id.pusulaCard);
 
         sensorler = (SensorManager) getSystemService(SENSOR_SERVICE);
 
         ImageButton fenerButonu = findViewById(R.id.fenerButon);
-        ConstraintLayout anaEkran = findViewById(R.id.main);
 
         kameraYonetici = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         try {
@@ -58,17 +67,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             e.printStackTrace();
         }
 
+        sos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sosSinyali();
+            }
+        });
+
         fenerButonu.setOnClickListener(v -> {
             fenerAcik = !fenerAcik;
 
             if(fenerAcik)
             {
-                anaEkran.setBackgroundColor(Color.WHITE);
                 fenerAc(true);
             }
             else
             {
-                anaEkran.setBackgroundColor(Color.BLACK);
                 fenerAc(false);
             }
         });
@@ -140,6 +154,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             if (kameraYonetici != null) {
                 kameraYonetici.setTorchMode(kameraID, acikMi);
             }
+
+            if(acikMi){
+                anaEkran.setBackgroundColor(Color.WHITE);
+            }
+            else{
+                anaEkran.setBackgroundColor(Color.BLACK);
+            }
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -148,4 +169,37 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
+
+    private void sosSinyali() {
+        new Thread(() -> {
+            try {
+                for (int i = 0; i < 3; i++) {
+                    fenerAc(true);
+                    Thread.sleep(300);
+                    fenerAc(false);
+                    Thread.sleep(300);
+                }
+
+                for (int i = 0; i < 3; i++) {
+                    fenerAc(true);
+                    Thread.sleep(900);
+                    fenerAc(false);
+                    Thread.sleep(300);
+                }
+
+                for (int i = 0; i < 3; i++) {
+                    fenerAc(true);
+                    Thread.sleep(300);
+                    fenerAc(false);
+                    Thread.sleep(300);
+                }
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+
+
 }
